@@ -1198,35 +1198,50 @@
                 blob.style.transform = `translate(${x}px, ${y}px)`;
             });
         });
+    </script>
 
-        // Simulate data loading (you can replace this with actual QR code scan data)
-        function loadCertificateData(certificateId) {
-            // This function would typically fetch data from your backend based on QR code scan
-            // For now, it uses placeholder data
-            return {
-                id: certificateId || 'BU/IET/ECE/IPR/W/2026/001',
-                name: 'Mr./Ms./Dr. [Name]',
-                date: '20th February 2026',
-                status: 'verified'
-            };
+    <script>
+        const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSeRLbh2LJc3jkDZEO4p-mdjUcLzVlKNjOHW8rRPGsgg37PDOaCXILW_ntSBDbDICbakeiU9S53p3Ri/pub?output=csv";
+
+        async function loadCertificate(certId) {
+            try {
+                const response = await fetch(sheetURL);
+                const csvText = await response.text();
+                const rows = csvText.split("\n").slice(1);
+
+                let found = false;
+
+                for (let row of rows) {
+                    const cols = row.split(",");
+                    if (cols[0].trim() === certId) {
+                        document.querySelectorAll(".info-value")[0].textContent = cols[0];
+                        document.querySelectorAll(".info-value")[1].textContent = cols[1];
+                        document.querySelectorAll(".info-value")[2].textContent = cols[2];
+                        document.querySelectorAll(".info-value")[3].textContent = cols[2];
+                        document.querySelector(".verify-status").textContent = cols[3];
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    document.querySelector(".verify-status").textContent = "Certificate Not Found";
+                }
+            } catch (err) {
+                document.querySelector(".verify-status").textContent = "Error Loading Data";
+            }
         }
 
-        // URL parameter handling for QR code scans
-        window.addEventListener('DOMContentLoaded', () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const certId = urlParams.get('cert');
-            const name = urlParams.get('name');
-            
+        window.addEventListener("DOMContentLoaded", () => {
+            const params = new URLSearchParams(window.location.search);
+            const certId = params.get("cert");
+
             if (certId) {
-                document.querySelector('.info-value').textContent = certId;
-            }
-            if (name) {
-                document.querySelectorAll('.info-value')[1].textContent = name;
+                loadCertificate(certId);
             }
         });
     </script>
 </body>
 </html>
-
 
 
